@@ -1,76 +1,68 @@
 package wordy
 
 import (
-	"errors"
-	"regexp"
 	"strconv"
 	"strings"
 )
 
 func Answer(question string) (int, bool) {
-	mathsEquationRegex := regexp.MustCompile(`What is ([\w -]+)\?$`)
-	mathsEquationMatches := mathsEquationRegex.FindStringSubmatch(question)
-	if mathsEquationMatches == nil {
+	question = strings.Replace(question, "What is ", "", 1)
+	question = strings.Replace(question, "?", "", 1)
+	question = strings.Replace(question, "multiplied by", "multiplied", -1)
+	question = strings.Replace(question, "divided by", "divided", -1)
+
+	parts := strings.Fields(question)
+
+	runningTotal := 0
+	operator := ""
+	i := 0
+	numParts := len(parts)
+
+	for i < numParts {
+		part := parts[i]
+
+		if part == "plus" || part == "minus" || part == "multiplied" || part == "divided" {
+			if operator != "" {
+				return 0, false
+			}
+
+			operator = part
+			i++
+			continue
+		}
+
+		num, err := strconv.Atoi(part)
+		if err != nil {
+			return 0, false
+		}
+
+		// extract out below into func:
+		switch operator {
+		case "":
+			if i == 0 {
+				runningTotal = num
+			} else {
+				return 0, false // two num in a row
+			}
+		case "plus":
+			runningTotal += num
+		case "minus":
+			runningTotal -= num
+		case "multiplied":
+			runningTotal *= num
+		case "divided":
+			runningTotal /= num
+		default:
+			return 0, false
+		}
+
+		i++
+		operator = ""
+	}
+
+	if operator != "" { // we're missing an operand here:
 		return 0, false
 	}
 
-	stringOfMaths := mathsEquationMatches[1]
-
-	// put in func start
-	// 5-5 matches this regex haha
-	numberRegex := regexp.MustCompile(`^([\d-]+)$`)
-	numberMatches := numberRegex.FindStringSubmatch(stringOfMaths)
-	if numberMatches != nil {
-		yah, _ := strconv.Atoi(numberMatches[1])
-
-		return yah, true
-	}
-
-	equationRegex := regexp.MustCompile(`^([\d-]+) ([a-z ]+) ([\d-]+)`)
-	equationMatches := equationRegex.FindStringSubmatch(stringOfMaths)
-	if equationMatches == nil {
-		return 0, false
-	}
-
-	result, err := doCalculation(equationMatches)
-	if err != nil {
-		return 0, false
-	}
-
-	stringOfMaths = strings.Replace(stringOfMaths, equationMatches[0], strconv.Itoa(result), 1)
-
-	numberMatches = numberRegex.FindStringSubmatch(stringOfMaths)
-	if numberMatches != nil {
-		return result, true
-	}
-
-	equationMatches = equationRegex.FindStringSubmatch(stringOfMaths)
-	if equationMatches == nil {
-		return 0, false
-	}
-
-	result, err = doCalculation(equationMatches)
-	if err != nil {
-		return 0, false
-	}
-
-	return result, true
-}
-
-func doCalculation(equationParts []string) (int, error) {
-	firstOperand, _ := strconv.Atoi(equationParts[1])
-	secondOperand, _ := strconv.Atoi(equationParts[3])
-
-	switch equationParts[2] {
-	case "plus":
-		return firstOperand + secondOperand, nil
-	case "minus":
-		return firstOperand - secondOperand, nil
-	case "multiplied by":
-		return firstOperand * secondOperand, nil
-	case "divided by":
-		return firstOperand / secondOperand, nil
-	default:
-		return 0, errors.New("bad operator 😔")
-	}
+	return runningTotal, true
 }

@@ -104,6 +104,12 @@ var tests = []wordyTest{
 		expected:    2,
 	},
 	{
+		description: "looooonnnggg equation",
+		question:    "What is -12 divided by 2 divided by -3 multiplied by 7 minus 3?",
+		expectError: false,
+		expected:    11,
+	},
+	{
 		description: "unknown operation",
 		question:    "What is 52 cubed?",
 		expectError: true,
