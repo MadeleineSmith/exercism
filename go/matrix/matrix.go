@@ -72,5 +72,11 @@ func (m Matrix) Rows() [][]int {
 }
 
 func (m Matrix) Set(row, col, val int) bool {
-	panic("Please implement the Set function")
+	if row < 0 || col < 0 || row > len(m)-1 || col > len(m[0])-1 {
+		return false
+	}
+
+	m[row][col] = val
+
+	return true
 }
