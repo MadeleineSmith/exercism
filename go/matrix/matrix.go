@@ -47,7 +47,20 @@ func (m Matrix) Cols() [][]int {
 }
 
 func (m Matrix) Rows() [][]int {
-	panic("Please implement the Rows function")
+	new3dSlice := make([][]int, len(m))
+
+	for i, row := range m {
+		for j, num := range row {
+			if j == 0 {
+				// could specify len here
+				new3dSlice[i] = []int{}
+			}
+
+			new3dSlice[i] = append(new3dSlice[i], num)
+		}
+	}
+
+	return new3dSlice
 }
 
 func (m Matrix) Set(row, col, val int) bool {
