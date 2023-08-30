@@ -43,7 +43,15 @@ func New(s string) (Matrix, error) {
 
 // Cols and Rows must return the results without affecting the matrix.
 func (m Matrix) Cols() [][]int {
-	panic("Please implement the Cols function")
+	new3dSlice := make([][]int, len(m[0]))
+
+	for i := 0; i < len(m[0]); i++ {
+		for j := 0; j < len(m); j++ {
+			new3dSlice[i] = append(new3dSlice[i], m[j][i])
+		}
+	}
+
+	return new3dSlice
 }
 
 func (m Matrix) Rows() [][]int {
